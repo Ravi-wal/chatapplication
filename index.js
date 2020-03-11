@@ -7,19 +7,31 @@ var io = require('socket.io')(http);
 app.get('/', function(req, res){
     res.sendFile(__dirname + '/chat.html');
 });
-
+var users=[];
 io.on('connection', function(socket){
-    console.log('a user connected');
-
+     users[socket.id] = 'Anonymous';
+    //console.log(users);
     socket.on('disconnect', function(){
-        console.log('user disconnected');
+        delete users[socket.id];
+        io.emit('users', JSON.stringify(Object.assign({}, users)));
     });
-
+   
     socket.on('chat message', function(msg){
-       // console.log(msg);
-        //io.emit('chat message', msg);
         socket.broadcast.emit('chat message', msg);
     });
+    socket.on('typing', function(typingUser){
+        socket.broadcast.emit('typing', typingUser);
+    });
+
+
+    socket.on('userName', function(userName){
+        users[socket.id] = userName;
+        console.log(JSON.stringify(Object.assign({}, users)));
+        io.emit('users', JSON.stringify(Object.assign({}, users)));
+     });
+
+    console.log(JSON.stringify(Object.assign({}, users)))
+    io.emit('users', JSON.stringify(Object.assign({}, users)));
 });
 
 

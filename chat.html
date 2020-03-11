@@ -222,6 +222,17 @@
             height: 516px;
             overflow-y: auto;
         }
+        .dot {
+            height: 10px;
+            width: 10px;
+            background-color: green;
+            border-radius: 50%;
+            display: inline-block;
+            }
+            .usertype {
+                color: grey;
+                font-size: 12px;
+            }
     </style>
 </head>
 
@@ -253,6 +264,7 @@
                                         alt="sunil"> </div>
                                 <div class="chat_ib">
                                     <h5>Sunil Rajput <!--<span class="chat_date">Dec 25</span>--></h5>
+                                    <p> <span class="dot"></span> Online</p>
                                 </div>
                             </div>
                         </div>
@@ -260,26 +272,14 @@
                 </div>
                 <div class="mesgs">
                     <div class="msg_history">
-                        <div class="incoming_msg">
-                            <div class="incoming_msg_img"> <img src="https://ptetutorials.com/images/user-profile.png"
-                                    alt="sunil"> </div>
-                            <div class="received_msg">
-                                <div class="received_withd_msg">
-                                    <p>Ravi::</p>
-                                    <p>Test which is a new approach to have all
-                                        solutions</p>
-                                    <span class="time_date"> 11:01 AM | June 9</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="outgoing_msg">
-                            <div class="sent_msg">
-                                <p>Test which is a new approach to have all
-                                    solutions</p>
-                                <span class="time_date"> 11:01 AM | June 9</span>
-                            </div>
-                        </div>
+                       
                         
+                    </div>
+                    <div class="usertype">
+                        <p>
+                            <span class="typeUser"></span> Typing . . . . .
+                        </p>
+
                     </div>
                     <div class="type_msg">
                         <form action="" class="chatForm">
@@ -301,7 +301,7 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
         var name='Anonymous';
-        var users={};
+        
         $(function () {
             var socket = io();
             $('.chatForm').submit(function (e) {
@@ -314,19 +314,37 @@
             });
 
             socket.on('chat message', function (msg) {
-                $('.msg_history').append('<div class="incoming_msg"><div class="incoming_msg_img"> <img src="https://ptetutorials.com/images/user-profile.png"alt="sunil"> </div><div class="received_msg"><div class="received_withd_msg"><p>'+msg.name+'::</p><p>'+msg.message+'</p><span class="time_date"> just now</span></div></div></div>');
+                $('.msg_history').append('<div class="incoming_msg"><div class="incoming_msg_img"> <img src="https://ptetutorials.com/images/user-profile.png"alt="'+name+'"> </div><div class="received_msg"><div class="received_withd_msg"><p>'+msg.name+'::</p><p>'+msg.message+'</p><span class="time_date"> just now</span></div></div></div>');
+            });
+
+            
+
+            socket.on('users', function (users) {
+                $('.inbox_chat').html('');
+                $.each(JSON.parse(users), function(key,val){
+                    $('.inbox_chat').append('<div class="chat_list"><div class="chat_people"><div class="chat_img"> <img src="https://ptetutorials.com/images/user-profile.png" alt="'+val+'"> </div><div class="chat_ib"><h5>'+val+'</h5><p> <span class="dot"></span> Online</p></div></div> </div>');
+                })
             });
 
             $('.nameForm').submit(function(e){
                 e.preventDefault();
                 name = $('#username').val();
                 $('#username').val('');
-
-                $('.inbox_chat').append('<div class="chat_list"><div class="chat_people"><div class="chat_img"> <img src="https://ptetutorials.com/images/user-profile.png"alt="sunil"> </div><div class="chat_ib"><h5>'+name+'</h5></div></div> </div>');
-
+                socket.emit('userName', name);
+                //$('.inbox_chat').append('<div class="chat_list"><div class="chat_people"><div class="chat_img"> <img src="https://ptetutorials.com/images/user-profile.png" alt="'+name+'"> </div><div class="chat_ib"><h5>'+name+'</h5><p> <span class="dot"></span> Online</p></div></div> </div>');
             })
 
+            $('.write_msg').keypress(function(){
+                socket.emit('typing', name);
+            })
 
+            socket.on('typing', function (typingUser) {
+                $('.typeUser').html(typingUser);
+                $('.usertype').show();
+                setTimeout(function(){ $('.usertype').hide(); }, 2000);
+                
+            });
+            $('.usertype').hide();
         });
     </script>
 
