@@ -37,6 +37,6 @@ io.on('connection', function(socket){
 
 
 
-http.listen(3002, function(){
-  console.log('listening at 3002');
+http.listen(3006, function(){
+  console.log('listening at 3006');
 });
